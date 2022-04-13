@@ -34,3 +34,21 @@ function createFileChecksum(files) {
     })
   );
 }
+
+/* http://localhost:3000/upload-sync route for uploading files */
+app.post('/upload-sync', upload.array('files'), (req, res) => {
+  /* get the array of file with checksum */
+  const data = createFileChecksumSync(req.files);
+  return res.send({ message: 'Uploaded successfully.', data });
+});
+
+function createFileChecksumSync(files) {
+  return files.map((file) => {
+    /* fs.readFileSync get the file content */
+    const readFileData = fs.readFileSync(`uploads\\${file.filename}`, { encoding: 'utf8' });
+    /* convert the readFileData to string and get the hash code using cryptoJs.SHA256 */
+    const checksum = cryptoJs.SHA256(readFileData.toString()).toString();
+    /* return the file object with generated checksum hash code */
+    return { ...file, checksum };
+  });
+}
